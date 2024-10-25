@@ -13,5 +13,7 @@
     }
   },
 
-  "remoteUser": "node"
+  "remoteUser": "node",
+  
+  "runArgs": ["--env-file", ".devcontainer/devcontainer.env"]
 }
