@@ -1,0 +1,23 @@
+{
+  "name": "materbot",
+  "version": "1.0.0",
+  "description": "Bot for Discord",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/materod-upv/materbot.git"
+  },
+  "author": "María Ten Rodríguez",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/materod-upv/materbot/issues"
+  },
+  "homepage": "https://github.com/materod-upv/materbot#readme",
+  "dependencies": {
+    "express": "^4.21.1"
+  }
+}

@@ -1,0 +1,17 @@
+// See https://containers.dev/implementors/json_reference/ for configuration reference
+{
+  "name": "Materbot",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "GitHub.copilot"
+      ]
+    }
+  },
+
+  "remoteUser": "node"
+}
