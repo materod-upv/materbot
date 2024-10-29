@@ -2,8 +2,8 @@
 
 Materbot is a useful bot with IA for Discord.
 
-# Deployment
-## LLM Model
+# Installation
+## Deploy the LLM Model
 
 1) Go to [HuggingFace](https://huggingface.co/) and create a new space.
 2) Clone the repository https://huggingface.co/spaces/_username_/_spacename_ 
@@ -57,6 +57,11 @@ if __name__ == "__main__":
 ```
 5) Git add, commit and push the files to the repository.
 6) Test the model.
+
+## Register a Discord Bot
+1) Open the [Discord delveloper portal](https://discord.com/developers/applications) and login.
+2) Create a new application
+3) Set the clientId and secret in a environment variable
 
 ## Materbot
 1) Install [flyctl](https://fly.io/docs/flyctl/install/)
