@@ -1,4 +1,4 @@
-const logger = require('./logger');
+const logger = require('../logger');
 
 class VoicePlayer {
   constructor() {
@@ -8,7 +8,7 @@ class VoicePlayer {
     VoicePlayer.instance = this;
   }
 
-  playSound(voiceChannel, soundFile, textMessage) {
+  playSound(voiceChannel, soundFile) {
     logger.debug(`Playing sound ${soundFile} in voice channel ${voiceChannel.name}`);
   }
 }
