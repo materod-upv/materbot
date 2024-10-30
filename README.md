@@ -58,6 +58,12 @@ if __name__ == "__main__":
 5) Git add, commit and push the files to the repository.
 6) Test the model.
 
+## Customize the bot
+Change the config/config.json file properties to customize your bot. You can use this vars to customize your messages:
+- **{user}**: User name
+- **{guild}**: Guild name
+- **{chanel}**: Chanel name
+
 ## Register a Discord Bot
 1) Open the [Discord delveloper portal](https://discord.com/developers/applications) and login.
 2) Create a new application
@@ -82,4 +88,4 @@ fly launch --name <your-app-name>
 fly deploy
 ```
 
-
+# Development

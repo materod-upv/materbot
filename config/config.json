@@ -1,0 +1,12 @@
+{
+  "voice": {
+    "joinVoiceChannel": "Hola {user}",
+    "leaveVoiceChannel": "Adiós {user}",
+    "joinAfkChannel": "{user} esta AFK",
+    "leaveAfkChannel": "Hola otra vez {user}",
+    "moveOldChannel": "{user} se ha movido a {new_channel}",
+    "moveNewChannel": "Que pasa {user}",
+    "startStreaming": "{user} ha comenzado una retransmisión",
+    "stopStreaming": "{user} ha finalizado la retransmisión"
+  }
+}
