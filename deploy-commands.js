@@ -10,7 +10,8 @@ const commandFolders = fs.readdirSync(foldersPath);
 const rest = new REST().setToken(process.env.DISCORD_TOKEN);
 
 function loadCommands() {
-  let commandCollection = new Collection();
+  let commands = new Collection();
+  let commandList = [];
 
   // Loop through all the folders in the commands directory
   for (const folder of commandFolders) {
@@ -21,20 +22,36 @@ function loadCommands() {
       const command = require(filePath);
       // Set a new item in the Collection with the key as the command name and the value as the exported module
       if ('data' in command && 'execute' in command) {
-        commandCollection.set(command.data.name, command);
+        commands.set(command.data.name, command);
+        commandList.push(command.data.toJSON());
       } else {
         logger.warn(`The command at ${filePath} is missing a required "data" or "execute" property.`);
       }
     }
   }
 
-  rest.put(Routes.applicationCommands(process.env.DISCORD_CLIENT_ID), { body: commandCollection }).then(() => {
-    logger.info(`Successfully reloaded ${commandCollection.size} application (/) commands.`);
+  rest.put(Routes.applicationCommands(process.env.DISCORD_CLIENT_ID), { body: commandList }).then(() => {
+    logger.info(`Successfully reloaded ${commandList.size} application (/) commands.`);
   }).catch(error => {
     logger.error(error);
   });
 
-  return commandCollection;
+  return commands;
 }
 
-module.exports = loadCommands;
+function loadEvents(client) {
+  const eventsPath = path.join(__dirname, 'events');
+  const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'));
+
+  for (const file of eventFiles) {
+    const filePath = path.join(eventsPath, file);
+    const event = require(filePath);
+    if (event.once) {
+      client.once(event.name, (...args) => event.execute(...args));
+    } else {
+      client.on(event.name, (...args) => event.execute(...args));
+    }
+  }
+}
+
+module.exports = { loadCommands, loadEvents };
