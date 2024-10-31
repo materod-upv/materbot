@@ -5,6 +5,7 @@ const path = require('path');
 const fs = require('fs');
 
 const logger = require('./logger');
+const { cleanTemporalFiles } = require('./sounds/cleanTmpFiles');
 const { Bot } = require('./bot');
 
 const app = express();
@@ -26,6 +27,11 @@ app.get('/', (req, res) => {
 // Start the server
 const server = app.listen(port, () => {
   logger.info(`Server listening on http://localhost:${port}`);
+
+  // Clean tmp files
+  cleanTemporalFiles();
+
+  // Start the bot
   bot.start();
 });
 

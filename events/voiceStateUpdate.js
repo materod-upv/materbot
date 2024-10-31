@@ -19,7 +19,7 @@ module.exports = {
 
       try {
         const audioFile = await textToSpeech.textToSpeech(msg);
-        VoicePlayer.playSound(oldState.channel, audioFile);
+        VoicePlayer.playSound(oldState.channel, audioFile, true);
       } catch (error) {
         logger.error(error);
       };
@@ -34,7 +34,7 @@ module.exports = {
 
       try {
         const audioFile = await textToSpeech.textToSpeech(msg);
-        VoicePlayer.playSound(newState.channel, audioFile);
+        VoicePlayer.playSound(newState.channel, audioFile, true);
       } catch (error) {
         logger.error(error);
       };
@@ -44,13 +44,13 @@ module.exports = {
         logger.debug(`${newState.member.user.tag} joined the AFK voice channel.`);
 
         let msg = config.voice.joinAfkChannel
-          .replace('{user}', newState.member.displayName)
-          .replace('{guild}', newState.member.guild.name)
-          .replace('{channel}', newState.channel.name);
+          .replace('{user}', oldState.member.displayName)
+          .replace('{guild}', oldState.member.guild.name)
+          .replace('{channel}', oldState.channel.name);
 
         try {
           const audioFile = await textToSpeech.textToSpeech(msg);
-          VoicePlayer.playSound(newState.channel, audioFile);
+          VoicePlayer.playSound(oldState.channel, audioFile, true);
         } catch (error) {
           logger.error(error);
         };
@@ -65,7 +65,7 @@ module.exports = {
 
         try {
           const audioFile = await textToSpeech.textToSpeech(msg);
-          VoicePlayer.playSound(newState.channel, audioFile);
+          VoicePlayer.playSound(newState.channel, audioFile, true);
         } catch (error) {
           logger.error(error);
         };
@@ -84,10 +84,10 @@ module.exports = {
 
         try {
           const audioFileOld = await textToSpeech.textToSpeech(msgOld);
-          VoicePlayer.playSound(oldState.channel, audioFileOld);
+          VoicePlayer.playSound(oldState.channel, audioFileOld, true);
 
           const audioFileNew = await textToSpeech.textToSpeech(msgNew);
-          VoicePlayer.playSound(newState.channel, audioFileNew);
+          VoicePlayer.playSound(newState.channel, audioFileNew, true);
         } catch (error) {
           logger.error(error);
         };
@@ -103,7 +103,7 @@ module.exports = {
 
         try {
           const audioFile = await textToSpeech.textToSpeech(msg);
-          VoicePlayer.playSound(newState.channel, audioFile);
+          VoicePlayer.playSound(newState.channel, audioFile, true);
         } catch (error) {
           logger.error(error);
         };
@@ -117,7 +117,7 @@ module.exports = {
 
         try {
           const audioFile = await textToSpeech.textToSpeech(msg);
-          VoicePlayer.playSound(newState.channel, audioFile);
+          VoicePlayer.playSound(newState.channel, audioFile, true);
         } catch (error) {
           logger.error(error);
         };

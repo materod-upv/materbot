@@ -2,7 +2,10 @@
 
 # Adjust NODE_VERSION as desired
 ARG NODE_VERSION=22.10.0
-FROM node:${NODE_VERSION}-slim as base
+FROM node:${NODE_VERSION} as base
+
+# Install basic development tools
+RUN apt update && apt install -y ffmpeg
 
 LABEL fly_launch_runtime="NodeJS"
 
