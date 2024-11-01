@@ -59,7 +59,9 @@ if __name__ == "__main__":
 6) Test the model.
 
 ## Customize the bot
-Change the config/config.json file properties to customize your bot. You can use this vars to customize your messages:
+By default the bot is translated to spanish. You can change the language in the environment variable BOT_LAG at fly.toml.
+
+Aditionally, you can customize some messages in the locales files. The voice messages can be customized with this vars:
 - **{user}**: User name
 - **{guild}**: Guild name
 - **{chanel}**: Chanel name
@@ -83,7 +85,12 @@ fly auth login
 ```bash
 fly launch --name <your-app-name>
 ```
-5) To deploy/update your new app use:
+5) Set some secret environment variables:
+```bash
+fly secrets set DISCORD_CLIENT_ID=xxxxx
+fly secrets set DISCORD_TOKEN=xxxxx
+```
+6) To deploy/update your new app use:
 ```bash
 fly deploy
 ```

@@ -1,11 +1,18 @@
 const { Events } = require('discord.js');
 const logger = require('../logger');
+const { loadCommands, deleteCommands } = require('../deploy-commands');
 
 module.exports = {
   name: Events.ClientReady,
   once: true,
   execute(client) {
     logger.info(`Ready! Logged in as ${client.user.tag}`);
+
+    // Delete all commands (Uncomment this line to delete all commands)
+    //deleteCommands(client);
+
+    // Load commands
+    loadCommands(client);
 
     // Show guilds data
     /*client.guilds.cache.map(guild => {

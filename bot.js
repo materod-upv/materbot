@@ -1,7 +1,6 @@
 // bot.js
-const { Client, Events, GatewayIntentBits } = require('discord.js');
-const logger = require('./logger');
-const { loadCommands, loadEvents } = require('./deploy-commands');
+const { Client, GatewayIntentBits } = require('discord.js');
+const { loadEvents } = require('./deploy-events');
 
 class Bot {
   constructor() {
@@ -15,8 +14,6 @@ class Bot {
         GatewayIntentBits.MessageContent,
       ],
     });
-    // Set commands
-    this.client.commands = loadCommands();
 
     // Load events
     loadEvents(this.client);

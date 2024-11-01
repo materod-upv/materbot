@@ -1,57 +1,77 @@
 // deploy-commands.js
-const fs = require('node:fs');
-const path = require('node:path');
+const fs = require('fs');
+const path = require('path');
 const { Collection, REST, Routes } = require('discord.js');
 const logger = require('./logger');
 
-const foldersPath = path.join(__dirname, 'commands');
-const commandFolders = fs.readdirSync(foldersPath);
+const commandsPath = path.join(__dirname, 'commands');
 
 const rest = new REST().setToken(process.env.DISCORD_TOKEN);
 
-function loadCommands() {
+function loadCommands(client) {
   let commands = new Collection();
   let commandList = [];
 
   // Loop through all the folders in the commands directory
-  for (const folder of commandFolders) {
-    const commandsPath = path.join(foldersPath, folder);
-    const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
-    for (const file of commandFiles) {
-      const filePath = path.join(commandsPath, file);
-      const command = require(filePath);
-      // Set a new item in the Collection with the key as the command name and the value as the exported module
-      if ('data' in command && 'execute' in command) {
-        commands.set(command.data.name, command);
-        commandList.push(command.data.toJSON());
-      } else {
-        logger.warn(`The command at ${filePath} is missing a required "data" or "execute" property.`);
-      }
+  const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+  for (const file of commandFiles) {
+    const filePath = path.join(commandsPath, file);
+    const command = require(filePath);
+    // Set a new item in the Collection with the key as the command name and the value as the exported module
+    if ('data' in command && 'execute' in command) {
+      commands.set(command.data.name, command);
+      commandList.push(command.data.toJSON());
+    } else {
+      logger.warn(`The command at ${filePath} is missing a required "data" or "execute" property.`);
     }
   }
 
-  rest.put(Routes.applicationCommands(process.env.DISCORD_CLIENT_ID), { body: commandList }).then(() => {
-    logger.info(`Successfully reloaded ${commandList.size} application (/) commands.`);
-  }).catch(error => {
-    logger.error(error);
+  client.commands = commands;
+
+  // Register commands globally in Discord (It could take up to 1 hour to update)
+  /*rest.put(Routes.applicationCommands(process.env.DISCORD_CLIENT_ID), { body: commandList })
+    .then(() => {
+      logger.info(`Successfully reloaded ${commandList.length} application (/) commands.`);
+    })
+    .catch((error) => {
+      logger.error(`Error reloading application (/) commands: ${error.message}`);
+    });*/
+
+  // Register commands in each guild (For dev-porpouses)
+  client.guilds.cache.map((guild) => {
+    rest.put(Routes.applicationGuildCommands(process.env.DISCORD_CLIENT_ID, guild.id), { body: commandList })
+      .then(() => {
+        logger.info(`Successfully reloaded ${commandList.length} guild (/) commands in guild ${guild.id}.`);
+      })
+      .catch((error) => {
+        logger.error(`Error reloading guild (/) commands in guild ${guild.id}: ${error.message}`);
+      });
   });
 
   return commands;
 }
 
-function loadEvents(client) {
-  const eventsPath = path.join(__dirname, 'events');
-  const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'));
 
-  for (const file of eventFiles) {
-    const filePath = path.join(eventsPath, file);
-    const event = require(filePath);
-    if (event.once) {
-      client.once(event.name, (...args) => event.execute(...args));
-    } else {
-      client.on(event.name, (...args) => event.execute(...args));
-    }
-  }
+function deleteCommands(client) {
+  // Delete all guild commands
+  client.guilds.cache.map((guild) => {
+    rest.put(Routes.applicationGuildCommands(process.env.DISCORD_CLIENT_ID, guild.id), { body: [] })
+      .then(() => {
+        logger.debug(`Deleted all commands in guild ${guild.id}`);
+      })
+      .catch((error) => {
+        logger.error(`Error deleting commands: ${error.message}`);
+      });
+  });
+
+  // Delete all global commands
+  rest.put(Routes.applicationCommands(process.env.DISCORD_CLIENT_ID), { body: [] })
+    .then(() => {
+      logger.debug('Deleted all global commands');
+    })
+    .catch((error) => {
+      logger.error(`Error deleting commands: ${error.message}`);
+    });
 }
 
-module.exports = { loadCommands, loadEvents };
+module.exports = { loadCommands, deleteCommands };
