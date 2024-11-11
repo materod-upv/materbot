@@ -81,13 +81,21 @@ module.exports = {
     const audioFile = soundList[sound];
     if (audioFile) {
       VoicePlayer.playSound(channel, audioFile);
+      const locales = {
+        'es-ES': `Añadido sonido "${sound}" a la cola de reproducción actual`,
+        'es-419': `Añadido sonido "${sound}" a la cola de reproducción actual`,
+      }
       await interaction.reply({
-        content: `Added sound "${sound}" to the current playing queue`,
+        content: locales[interaction.locale] ?? `Added sound "${sound}" to the current playing queue`,
         ephemeral: true,
       });
     } else {
+      const locales = {
+        'es-ES': `Sonido "${sound}" no encontrado`,
+        'es-419': `Sonido "${sound}" no encontrado`,
+      }
       await interaction.reply({
-        content: `Sound "${sound}" not found`,
+        content: locales[interaction.locale] ?? `Sound "${sound}" not found`,
         ephemeral: true,
       });
     }

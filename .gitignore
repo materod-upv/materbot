@@ -130,5 +130,8 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
+# Config secrets
+config/secrets
+
 # Temporal audio files
 sounds/tmp/*

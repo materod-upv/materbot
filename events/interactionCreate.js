@@ -4,26 +4,34 @@ const logger = require('../logger');
 module.exports = {
   name: Events.InteractionCreate,
   async execute(interaction) {
-    if (interaction.isChatInputCommand() || interaction.isAutocomplete()) {
-      const command = interaction.client.commands.get(interaction.commandName);
-      if (!command) {
-        logger.error(`No command matching ${interaction.commandName} was found.`);
-        return;
-      }
+    let commandId = interaction.commandName;
+    if (interaction.isModalSubmit()) {
+      commandId = interaction.customId;
+    }
 
-      try {
-        if (interaction.isChatInputCommand()) {
-          await command.execute(interaction);
-        } else if (interaction.isAutocomplete()) {
-          await command.autocomplete(interaction);
-        }
-      } catch (error) {
-        logger.error(error);
-        if (interaction.replied || interaction.deferred) {
-          await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
-        } else {
-          await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
-        }
+    const command = interaction.client.commands.get(commandId);
+    if (!command) {
+      logger.error(`No command matching ${commandId} was found.`);
+      return;
+    }
+
+    try {
+      if (interaction.isChatInputCommand()) {
+        // Chat input command
+        await command.execute(interaction);
+      } else if (interaction.isAutocomplete()) {
+        // Autocomplete command
+        await command.autocomplete(interaction);
+      } else if (interaction.isModalSubmit()) {
+        // Modal submit command
+        await command.submit(interaction);
+      }
+    } catch (error) {
+      logger.error(error);
+      if (interaction.replied || interaction.deferred) {
+        await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
+      } else {
+        await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
       }
     }
   },

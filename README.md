@@ -58,6 +58,16 @@ if __name__ == "__main__":
 5) Git add, commit and push the files to the repository.
 6) Test the model.
 
+## Set up your databse
+1) Register on [firebase](https://console.firebase.google.com/project/_/database?hl=es)
+2) Create a new project for your bot. For example: materbot-db
+3) Select Firestore Database and press Create databse.
+4) Go to project settings > Service account and create a new private key for Node.js
+5) Convert your json configuration file to a base64 string:
+```bash
+cat config_file.json | base6
+```
+
 ## Customize the bot
 By default the bot is translated to spanish. You can change the language in the environment variable BOT_LAG at fly.toml.
 
@@ -89,6 +99,7 @@ fly launch --name <your-app-name>
 ```bash
 fly secrets set DISCORD_CLIENT_ID=xxxxx
 fly secrets set DISCORD_TOKEN=xxxxx
+fly secrets set FIREBASE_CONFIG_B64=xxxxx
 ```
 6) To deploy/update your new app use:
 ```bash
