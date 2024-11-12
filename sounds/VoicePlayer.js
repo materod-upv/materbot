@@ -1,15 +1,11 @@
-const path = require('path');
 const fs = require('fs');
 const Queue = require('better-queue');
 const { AudioPlayerStatus,
   createAudioPlayer,
   createAudioResource,
-  demuxProbe,
   joinVoiceChannel,
-  getVoiceConnection,
   getVoiceConnections,
-  NoSubscriberBehavior,
-  VoiceConnectionStatus } = require('@discordjs/voice');
+  NoSubscriberBehavior } = require('@discordjs/voice');
 const { deleteFile } = require('./cleanTmpFiles');
 const logger = require('../logger');
 
@@ -18,6 +14,13 @@ const MAX_QUEUE_TIME = 300000;
 
 async function processTask(task, cb) {
   logger.debug(`Playing sound ${task.soundFile} in channel ${task.voiceChannel.name}`);
+
+  // Check if voice channel is empty
+  if (task.voiceChannel.members.size === 0) {
+    logger.debug(`Voice channel ${task.voiceChannel.name} is empty, skipping sound ${task.soundFile}`);
+    cb();
+    return;
+  }
 
   // Join voice channel
   const connection = joinVoiceChannel({

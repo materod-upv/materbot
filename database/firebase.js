@@ -9,26 +9,49 @@ firebase.initializeApp({
 });
 
 const db = firebase.firestore();
+const usersCache = {};
 
-async function getUsers() {
+async function initUsersCache() {
+  const usersSnapshot = await db.collection('users').get();
+  usersSnapshot.docs.forEach(doc => {
+    usersCache[doc.id] = doc.data();
+  });
+  logger.debug('Users cache loaded:', usersCache);
+}
+
+async function getUser(userId) {
   try {
-    const usersSnapshot = await db.collection('users').get();
-    const users = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    // Check if user is in cache
+    if (usersCache[userId]) {
+      logger.debug(`Getting user ${userId} from cache:`, usersCache[userId]);
+      return usersCache[userId];
+    }
 
-    logger.debug('Getting users list from firebase:', users);
-    return users;
+    // Get user from firebase
+    const user = await db.collection('users').doc(userId).get();
+    if (!user.exists) {
+      logger.debug(`User ${userId} not found in firebase`);
+      return null;
+    }
+
+    usersCache[userId] = user.data();
+    logger.debug(`Getting user ${userId} from firebase:`, user.data());
+    return user.data();
   } catch (error) {
-    logger.error("Error getting users:", error);
+    logger.error(`Error getting user ${userId} from firebase:`, error);
+    throw error;
   }
 }
 
-async function setUser(userId, userData) {
+async function setUser(userId, data) {
   try {
-    await db.collection('users').doc(userId).set(userData);
-    logger.debug("Added user with id:", userId);
+    await db.collection('users').doc(userId).set(data, { merge: true });
+    usersCache[userId] = data;
+    logger.debug(`User ${userId} data updated in firebase:`, data);
   } catch (error) {
-    logger.error("Error setting user:", error);
+    logger.error(`Error updating user ${userId} data in firebase:`, error);
+    throw error;
   }
 }
 
-module.exports = { getUsers, setUser };
+module.exports = { initUsersCache, getUser, setUser };

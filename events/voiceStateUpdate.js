@@ -1,8 +1,10 @@
+const path = require('path');
 const { Events } = require('discord.js');
 const logger = require('../logger');
 const textToSpeech = require('../sounds/tts');
 const VoicePlayer = require('../sounds/VoicePlayer');
 const config = require('../config/config.json');
+const { getUser } = require('../database/firebase');
 
 module.exports = {
   name: Events.VoiceStateUpdate,
@@ -26,6 +28,18 @@ module.exports = {
 
     } else if (oldState.channelId === null) {
       logger.debug(`${newState.member.displayName} joined ${newState.channel.name} channel.`);
+
+      // Play birthday sound if user has birthday today
+      const user = await getUser(newState.member.user.id);
+      if (user && user.birthday) {
+        const today = new Date();
+        const birthday = new Date(user.birthday);
+        if (today.getMonth() === birthday.getMonth() && today.getDate() === birthday.getDate()) {
+          const birthdayAudioPath = path.join(__dirname + '/../resources/audio/cumple.mp3');
+          VoicePlayer.playSound(newState.channel, birthdayAudioPath);
+          return;
+        }
+      }
 
       let msg = config.voice.joinVoiceChannel
         .replace('{user}', newState.member.displayName)

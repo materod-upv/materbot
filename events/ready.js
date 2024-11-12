@@ -5,7 +5,7 @@ const { loadCommands, deleteCommands } = require('../deploy-commands');
 module.exports = {
   name: Events.ClientReady,
   once: true,
-  execute(client) {
+  async execute(client) {
     logger.info(`Ready! Logged in as ${client.user.tag}`);
 
     // Delete all commands (Uncomment this line to delete all commands)
