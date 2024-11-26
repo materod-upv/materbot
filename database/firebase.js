@@ -11,12 +11,20 @@ firebase.initializeApp({
 const db = firebase.firestore();
 const usersCache = {};
 
-async function initUsersCache() {
-  const usersSnapshot = await db.collection('users').get();
-  usersSnapshot.docs.forEach(doc => {
-    usersCache[doc.id] = doc.data();
+function loadUserCache() {
+  // Load users cache
+  db.collection('users').get().then(usersSnapshot => {
+    usersSnapshot.docs.forEach(doc => {
+      usersCache[doc.id] = doc.data();
+    });
+    logger.debug(`Loaded ${usersSnapshot.size} users into cache`);
+  }).catch(error => {
+    logger.error('Error loading users cache from firebase:', error);
   });
-  logger.debug('Users cache loaded:', usersCache);
+}
+
+function getUsersList() {
+  return usersCache;
 }
 
 async function getUser(userId) {
@@ -54,4 +62,4 @@ async function setUser(userId, data) {
   }
 }
 
-module.exports = { initUsersCache, getUser, setUser };
+module.exports = { loadUserCache, getUsersList, getUser, setUser };

@@ -2,8 +2,9 @@
 const Text2Speech = require('better-node-gtts').Text2Speech;
 const path = require('path');
 const logger = require('../logger');
+const config = require('../config/config');
 
-const gtts = new Text2Speech('es-us');
+const gtts = new Text2Speech(config.voice.lang);
 
 async function textToSpeech(text) {
   logger.debug(`Text to speech: ${text}`);

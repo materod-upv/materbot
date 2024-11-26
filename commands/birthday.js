@@ -43,8 +43,6 @@ module.exports = {
     await interaction.showModal(modal);
   },
   async submit(interaction) {
-    console.log("Me llega el submit");
-
     const date = interaction.fields.getTextInputValue('dateInput');
 
 
@@ -72,7 +70,10 @@ module.exports = {
 
     // Set the birthday in the database
     try {
-      await setUser(interaction.user.id, { birthday: birthday });
+      await setUser(interaction.user.id, {
+        username: interaction.user.username,
+        birthday: birthday
+      });
       const locales = {
         'es-ES': `Tu cumpleaños se ha establecido en ${date}`,
         'es-419': `Tu cumpleaños se ha establecido en ${date}`,

@@ -1,6 +1,8 @@
 const { Events } = require('discord.js');
 const logger = require('../logger');
 const { loadCommands, deleteCommands } = require('../deploy-commands');
+const { loadUserCache } = require('../database/firebase');
+const { startCron } = require('../scheduler/cron');
 
 module.exports = {
   name: Events.ClientReady,
@@ -13,6 +15,12 @@ module.exports = {
 
     // Load commands
     loadCommands(client);
+
+    // Load user cache
+    loadUserCache();
+
+    // Initialize the cron
+    startCron(client);
 
     // Show guilds data
     /*client.guilds.cache.map(guild => {

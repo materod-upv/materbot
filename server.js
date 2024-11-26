@@ -13,7 +13,7 @@ const port = process.env.PORT || 8080;
 const bot = new Bot();
 
 // Use morgan as middleware to log HTTP requests
-const accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' });
+const accessLogStream = fs.createWriteStream(path.join(__dirname, 'logs', 'access.log'), { flags: 'a' });
 app.use(morgan('combined', { stream: accessLogStream }));
 
 // Servir archivos estáticos desde el directorio 'public'
@@ -33,6 +33,7 @@ const server = app.listen(port, () => {
 
   // Start the bot
   bot.start();
+
 });
 
 function shutdown() {

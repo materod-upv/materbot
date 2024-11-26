@@ -1,7 +1,6 @@
 // bot.js
 const { Client, GatewayIntentBits } = require('discord.js');
 const { loadEvents } = require('./deploy-events');
-const { initUsersCache } = require('./database/firebase');
 
 class Bot {
   constructor() {
@@ -18,9 +17,6 @@ class Bot {
 
     // Load events
     loadEvents(this.client);
-
-    // Load users cache
-    initUsersCache();
   }
 
   start() {

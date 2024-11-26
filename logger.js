@@ -1,4 +1,5 @@
 const winston = require('winston');
+const path = require('path');
 
 // Configure winston
 const logger = winston.createLogger({
@@ -11,7 +12,7 @@ const logger = winston.createLogger({
   ),
   transports: [
     new winston.transports.Console(),
-    new winston.transports.File({ filename: 'logs/app.log' })
+    new winston.transports.File({ filename: path.join(__dirname, 'logs', 'bot.log') }),
   ],
 });
 
