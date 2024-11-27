@@ -99,6 +99,7 @@ fly launch --name <your-app-name>
 ```bash
 fly secrets set DISCORD_CLIENT_ID=xxxxx
 fly secrets set DISCORD_TOKEN=xxxxx
+fly secrets set OPENROUTER_AI_TOKEN=xxxxx
 fly secrets set FIREBASE_CONFIG_B64=xxxxx
 ```
 6) To deploy/update your new app use:

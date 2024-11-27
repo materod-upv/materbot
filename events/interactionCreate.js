@@ -16,7 +16,7 @@ module.exports = {
     }
 
     try {
-      if (interaction.isChatInputCommand()) {
+      if (interaction.isChatInputCommand() || interaction.isContextMenuCommand()) {
         // Chat input command
         await command.execute(interaction);
       } else if (interaction.isAutocomplete()) {
