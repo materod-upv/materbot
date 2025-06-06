@@ -3,6 +3,7 @@ const {
   ActionRowBuilder,
   ContextMenuCommandBuilder,
   ModalBuilder,
+  MessageFlags,
   TextInputBuilder,
   TextInputStyle
 } = require('discord.js');
@@ -28,7 +29,7 @@ module.exports = {
         'es-419': `No puedes establecer el cumpleños de otra persona`,
       };
       logger.warn(`User ${executingUser.id} tried to set the birthday of another user ${targetUser.id}`);
-      await interaction.reply({ content: locales[interaction.locale] ?? `You can't set the birthday of another person`, ephemeral: true });
+      await interaction.reply({ content: locales[interaction.locale] ?? `You can't set the birthday of another person`, flags: MessageFlags.Ephemeral });
       return;
     }
 
@@ -89,7 +90,7 @@ module.exports = {
         'es-419': `La fecha introducida no es válida`,
       };
       logger.error(`Invalid date format for user ${targetUser.id}: ${date}`);
-      await interaction.reply({ content: locales[interaction.locale] ?? `Invalid date format`, ephemeral: true });
+      await interaction.reply({ content: locales[interaction.locale] ?? `Invalid date format`, flags: MessageFlags.Ephemeral });
       return;
     }
 
@@ -102,7 +103,7 @@ module.exports = {
       'es-ES': `Actualizando cumpleaños...`,
       'es-419': `Actualizando cumpleaños...`,
     };
-    await interaction.reply({ content: locales[interaction.locale] ?? `Updating birthday...`, ephemeral: true });
+    await interaction.reply({ content: locales[interaction.locale] ?? `Updating birthday...`, flags: MessageFlags.Ephemeral });
 
     // Set the birthday in the database
     try {
@@ -115,14 +116,14 @@ module.exports = {
         'es-419': `El cumpleaños de ${targetUser.username} se ha establecido en ${date}`,
       };
       logger.info(`Set birthday of user ${targetUser.id} to ${date}`);
-      await interaction.editReply({ content: locales[interaction.locale] ?? `The birthday of ${targetUser.username} is set to ${date}`, ephemeral: true });
+      await interaction.editReply({ content: locales[interaction.locale] ?? `The birthday of ${targetUser.username} is set to ${date}`, flags: MessageFlags.Ephemeral });
     } catch (error) {
       const locales = {
         'es-ES': `No se ha podido actualizar el cumpleaños`,
         'es-419': `No se ha podido actualizar el cumpleaños`,
       };
       logger.error(`Error setting birthday for user ${targetUser.id}: `, error);
-      await interaction.reply({ content: locales[interaction.locale] ?? `Could not set the birthday`, ephemeral: true });
+      await interaction.reply({ content: locales[interaction.locale] ?? `Could not set the birthday`, flags: MessageFlags.Ephemeral });
     }
   }
 };

@@ -3,9 +3,7 @@
     "url": "https://materbot.fly.dev/"
   },
   "birthday": {
-    "title": "¡Feliz cumpleaños {user}!",
-    "prompt" : "Eres un generador de felicitaciones de cumpleaños. Las feilicitaciones deben ser cortas, groseras, sarcásticas y en un tono de humor. En ellas aprovechas para burlarte de los humanos a los que consideras inferiores.",
-    "task": "Genera una felicitation de cumpleaños para {user}"
+    "title": "¡Feliz cumpleaños {user}!"
   },
   "voice": {
     "lang": "es-us",

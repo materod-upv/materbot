@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { SlashCommandBuilder, ChannelType, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, ChannelType, MessageFlags, PermissionFlagsBits } = require('discord.js');
 
 const VoicePlayer = require('../sounds/VoicePlayer');
 const logger = require('../logger');
@@ -87,7 +87,7 @@ module.exports = {
       }
       await interaction.reply({
         content: locales[interaction.locale] ?? `Added sound "${sound}" to the current playing queue`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     } else {
       const locales = {
@@ -96,7 +96,7 @@ module.exports = {
       }
       await interaction.reply({
         content: locales[interaction.locale] ?? `Sound "${sound}" not found`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
   },
