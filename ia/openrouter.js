@@ -37,4 +37,28 @@ async function generateBirthdayMessage(username) {
   return "¡Hoy es un gran dia! ¡Un dia feliz es! ¡" + username + " feliz cumpleaños! ¡¡¡Voy a hacer una tarta que no vas a olvidar en toda tu vida!!! :birthday:"
 }
 
-module.exports = { generateBirthdayMessage };
+async function generateBotResponse(username, message) {
+  const task = `Usuario: ${username} pregunta: ${message}`;
+
+  try {
+    const completion = await openai.chat.completions.create({
+      model: "deepseek/deepseek-chat-v3-0324:free",
+      messages: [
+        { "role": "system", "content": systemPrompt },
+        { "role": "user", "content": task }
+      ]
+    });
+
+    if (completion.choices && completion.choices.length > 0 && completion.choices[0].finish_reason === "stop") {
+      return completion.choices[0].message.content;
+    }
+
+    logger.error(`Error generating response for user ${username}: No valid response from IA.`);
+    return "Lo siento, no puedo responder a eso.";
+  } catch (error) {
+    logger.error(`Error generating response for user ${username}:`, error);
+    return "Lo siento, ha ocurrido un error al procesar tu solicitud.";
+  }
+}
+
+module.exports = { generateBirthdayMessage, generateBotResponse };
