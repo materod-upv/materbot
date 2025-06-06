@@ -10,20 +10,23 @@ function sendHappyBirthDayMsg(guilds) {
   for (id in users) {
     const birthDate = new Date(users[id].birthday);
     if (birthDate.getDate() === today.getDate() && birthDate.getMonth() === today.getMonth()) {
-      logger.debug(`Today is the birthday of user ${id}...`);
+      logger.debug(`Today is the birthday of user ${users[id].username}...`);
 
-      generateBirthdayMessage(users[id].username).then((message) => {
-        guilds.forEach((guild) => {
-          guild.members
-            .fetch(id)
-            .then((member) => {
-              logger.debug(`Sending birthday message to user ${member.user.tag} in channel ${member.guild.systemChannel} of guild ${member.guild.name}`);
-
-              let title = config.birthday.title
+      // For each guild, fetch the member and send the birthday message
+      guilds.map((guild) => {
+        guild.members.fetch(id)
+          .then(member => {
+            let title = config.birthday.title
                 .replace('{user}', member.displayName)
-                .replace('{guild}', member.guild.name);
+                .replace('{guild}', guild.name);
 
-              // Create birthday message
+            logger.debug(`Birthday message title: ${title}`);
+
+            generateBirthdayMessage(member.displayName).then((message) => {
+              logger.debug(`Birthday message: ${message}`);
+              logger.debug(`Channel: ${guild.systemChannel}`);
+
+              // Create birthday message embed
               const messageEmbed = new EmbedBuilder()
                 .setColor(parseInt("0xFF0084"))
                 .setTitle(title)
@@ -34,13 +37,21 @@ function sendHappyBirthDayMsg(guilds) {
                 .setDescription(message)
                 .setThumbnail(member.user.displayAvatarURL());
 
-              if (member.guild.systemChannel) {
-                member.guild.systemChannel.send({ embeds: [messageEmbed] });
+              if (guild.systemChannel) {
+                guild.systemChannel.send({ embeds: [messageEmbed] });
               }
+
+            }).catch((err) => {
+              logger.error(`Error generating birthday message for user ${id}: ${err}`);
             });
-        });
-      }).catch((err) => {
-        logger.error(`Error generating birthday message for user ${id}: ${err}`);
+          })
+          .catch(error => {
+            if (error.code === 10007) {
+              logger.debug(`User ${id} not found in guild ${guild.name}.`);
+            } else {
+              logger.error(`Error fetching user ${id} in guild ${guild.name}: ${error.message}`);
+            }
+          });
       });
     }
   }

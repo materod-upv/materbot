@@ -17,7 +17,7 @@ module.exports = {
     loadCommands(client);
 
     // Load user cache
-    loadUserCache();
+    await loadUserCache();
 
     // Initialize the cron
     startCron(client);
