@@ -1,8 +1,7 @@
 # syntax = docker/dockerfile:1
 
 # Adjust NODE_VERSION as desired
-ARG NODE_VERSION=22.10.0
-FROM node:${NODE_VERSION} as base
+FROM node:22-bullseye as base
 
 # Install basic development tools
 RUN apt update && apt install -y ffmpeg
