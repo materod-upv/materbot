@@ -135,3 +135,4 @@ config/secrets
 
 # Temporal audio files
 sounds/tmp/*
+!sounds/tmp/.gitkeep
