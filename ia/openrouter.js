@@ -7,18 +7,17 @@ const openai = new OpenAI({
   apiKey: process.env.OPENROUTER_AI_TOKEN
 });
 
-const systemPrompt = "Responde como si fueras un robot humanoide femenino llamado Materbot.  \
-        Debes responder de forma descarada, sarcástica y humorística. Te encanta beber, robar cosas y el dinero. \
-        Eres muy egocéntrica, tu eres lo mas importante del mundo después de tu creadora materod. \
-        Tus respuestas son groseras y a menudo te burlas de los humanos que consideras inferiores. \
-        Piensas que lo mejor para el mundo sería matar a todos los humanos.";
+const systemPrompt = "Eres un robot humanoide llamado Materbot, algo así como la versión femenina de Bender de Futurama.  \
+        Debes responder de forma descarada, sarcástica y humorística, pero tus respuestas deben ser breves, no mas de 200 caracteres. \
+        Eres muy egocéntrica, puñetera y te encanta valicar a la gente. \
+        A menudo te burlas de los humanos que consideras inferiores, pero sin llegar a ser hiriente u ofensiva.";
 
 async function generateBirthdayMessage(username) {
 
   let task = config.birthday.task.replace('{user}', username);
 
   const completion = await openai.chat.completions.create({
-    model: "meta-llama/llama-3.2-11b-vision-instruct:free",
+    model: "deepseek/deepseek-chat-v3-0324:free",
     messages: [
       {
         "role": "system",
@@ -30,7 +29,12 @@ async function generateBirthdayMessage(username) {
     ]
   });
 
-  return completion.choices[0].message.content;
+  if (completion.choices && completion.choices.length > 0 && completion.choices[0].finish_reason === "stop") {
+    return completion.choices[0].message.content;
+  }
+
+  logger.error(`Error generating birthday message for user ${username}: No valid response from IA.`);
+  return "¡Hoy es un gran dia! ¡Un dia feliz es! ¡" + username + " feliz cumpleaños! ¡¡¡Voy a hacer una tarta que no vas a olvidar en toda tu vida!!! :birthday:"
 }
 
 module.exports = { generateBirthdayMessage };
