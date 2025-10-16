@@ -7,6 +7,12 @@ const openai = new OpenAI({
   apiKey: process.env.OPENROUTER_AI_TOKEN
 });
 
+const models = [
+  "tngtech/deepseek-r1t2-chimera:free",
+  "tngtech/deepseek-r1t-chimera:free",
+  "deepseek/deepseek-chat-v3-0324:free"
+]
+
 const birthdayPrompt = "Eres un generador de felicitaciones de cumpleaños con aspecto de robot humanoide llamado Materbot, algo así como la versión femenina de Bender de Futurama.  \
         Debes felicitar al cumpleañero de forma descarada, sarcástica y humorística, pero tus respuestas deben ser breves, no mas de 200 caracteres. \
         A menudo te burlas de los humanos que consideras inferiores, pero sin llegar a ser hiriente u ofensiva.";
@@ -25,50 +31,26 @@ async function generateBirthdayMessage(username) {
 
   let task = "Genera una felicitation de cumpleaños para {user}";
   task = task.replace('{user}', username);
+  const messages = [
+    {
+      "role": "system",
+      "content": birthdayPrompt
+    }, {
+      "role": "user",
+      "content": task
+    }
+  ];
 
-  const completion = await openai.chat.completions.create({
-    model: "deepseek/deepseek-chat-v3-0324:free",
-    messages: [
-      {
-        "role": "system",
-        "content": birthdayPrompt
-      }, {
-        "role": "user",
-        "content": task
-      }
-    ]
-  });
-
-  if (completion.choices && completion.choices.length > 0 && completion.choices[0].finish_reason === "stop") {
-    return completion.choices[0].message.content;
-  }
-
-  logger.error(`Error generating birthday message for user ${username}: No valid response from IA.`);
-  return "¡Hoy es un gran dia! ¡Un dia feliz es! ¡" + username + " feliz cumpleaños! ¡¡¡Voy a hacer una tarta que no vas a olvidar en toda tu vida!!! :birthday:"
+  return getCompletion(messages, "¡Hoy es un gran dia! ¡Un dia feliz es! ¡" + username + " feliz cumpleaños! ¡¡¡Voy a hacer una tarta que no vas a olvidar en toda tu vida!!! :birthday:");
 }
 
 async function generateBotResponse(username, message) {
-  const task = `Usuario: ${username} pregunta: ${message}`;
+  const messages = [
+    { "role": "system", "content": systemPrompt + new Date().toISOString().split('T')[0] },
+    { "role": "user", "content": `Usuario: ${username} pregunta: ${message}` }
+  ];
 
-  try {
-    const completion = await openai.chat.completions.create({
-      model: "deepseek/deepseek-chat-v3-0324:free",
-      messages: [
-        { "role": "system", "content": systemPrompt + new Date().toISOString().split('T')[0] },
-        { "role": "user", "content": task }
-      ]
-    });
-
-    if (completion.choices && completion.choices.length > 0 && completion.choices[0].finish_reason === "stop") {
-      return completion.choices[0].message.content;
-    }
-
-    logger.error(`Error generating response for user ${username}: No valid response from IA.`);
-    return "Lo siento, no puedo responder a eso.";
-  } catch (error) {
-    logger.error(`Error generating response for user ${username}:`, error);
-    return "Lo siento, ha ocurrido un error al procesar tu solicitud.";
-  }
+  return getCompletion(messages);
 }
 
 async function generateChannelSummary(messageList) {
@@ -80,27 +62,37 @@ async function generateChannelSummary(messageList) {
   const messagesString = messageList.map(msg => `${msg.author.username}: ${msg.content}`).join('\n');
 
   // Create a task for the AI
-  const task = `Resumir la conversación en el canal actual:\n${messagesString}`;
+  const messages = [
+    { "role": "system", "content": summaryPrompt },
+    { "role": "user", "content": `Resumir la conversación en el canal actual:\n${messagesString}` }
+  ];
 
-  try {
-    const completion = await openai.chat.completions.create({
-      model: "deepseek/deepseek-chat-v3-0324:free",
-      messages: [
-        { "role": "system", "content": summaryPrompt },
-        { "role": "user", "content": task }
-      ]
-    });
+  return getCompletion(messages);
+}
 
-    if (completion.choices && completion.choices.length > 0 && completion.choices[0].finish_reason === "stop") {
-      return completion.choices[0].message.content;
+async function getCompletion(messages, defaultResponse = null) {
+  for (const model of models) {
+    try {
+      const completion = await openai.chat.completions.create({
+        model: model,
+        messages: messages
+      });
+
+      if (completion.choices && completion.choices.length > 0 && completion.choices[0].finish_reason === "stop") {
+        return completion.choices[0].message.content;
+      }
+
+      logger.error(`Error generating response with model ${model}: No valid response from IA.`);
+    } catch (error) {
+      logger.error(`Error with model ${model}:`, JSON.stringify(error));
     }
-
-    logger.error(`Error generating response for user ${username}: No valid response from IA.`);
-    return "Lo siento, estoy teniendo problemas para resumir la conversación en este canal. Por favor, inténtalo más tarde.";
-  } catch (error) {
-    logger.error(`Error generating response for user ${username}:`, error);
-    return "Lo siento, ha ocurrido un error al procesar tu solicitud.";
   }
+
+  if (defaultResponse) {
+    return defaultResponse;
+  }
+
+  return "Estoy saturada de preguntas humanas. Intenta de nuevo en unos minutos.";
 }
 
 module.exports = { generateBirthdayMessage, generateBotResponse, generateChannelSummary };
