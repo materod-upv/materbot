@@ -82,6 +82,9 @@ async function getCompletion(messages, defaultResponse = null) {
         return completion.choices[0].message.content;
       }
 
+      console.log("Respuesta: ");
+      console.log(completion);
+
       logger.error(`Error generating response with model ${model}: No valid response from IA.`);
     } catch (error) {
       logger.error(`Error with model ${model}:`, JSON.stringify(error));
