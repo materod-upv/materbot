@@ -13,7 +13,9 @@ module.exports = {
     if (message.mentions.users.has(message.client.user.id)) {
       await message.channel.sendTyping();
       const response = await generateBotResponse(message.author.tag, message.content);
-      await message.reply(response);
+      if (response && response.trim() !== '') {
+        await message.reply(response);
+      }
     }
   },
 };
