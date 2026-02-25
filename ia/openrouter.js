@@ -1,16 +1,15 @@
-const OpenAI = require('openai');
+const { Mistral } = require('@mistralai/mistralai');
 const { logger } = require('../logger');
 const config = require('../config/config');
 
-const openai = new OpenAI({
-  baseURL: "https://openrouter.ai/api/v1",
-  apiKey: process.env.OPENROUTER_AI_TOKEN
+const mistral = new Mistral({
+  apiKey: process.env.MISTRAL_TOKEN
 });
 
 const models = [
-  "tngtech/deepseek-r1t2-chimera:free",
-  "tngtech/deepseek-r1t-chimera:free",
-  "deepseek/deepseek-chat-v3-0324:free"
+  "mistral-small-latest",
+  "mistral-medium-latest",
+  "open-mistral-7b"
 ]
 
 const birthdayPrompt = "Eres un generador de felicitaciones de cumpleaños con aspecto de robot humanoide llamado Materbot \
@@ -76,17 +75,17 @@ async function generateChannelSummary(messageList) {
 async function getCompletion(messages, defaultResponse = null) {
   for (const model of models) {
     try {
-      const completion = await openai.chat.completions.create({
+      const completion = await mistral.chat.complete({
         model: model,
         messages: messages
       });
 
-      if (completion.choices && completion.choices.length > 0 && completion.choices[0].finish_reason === "stop") {
+      if (completion.choices && completion.choices.length > 0 && completion.choices[0].finishReason === "stop") {
         return completion.choices[0].message.content;
       }
 
-      console.log("Respuesta: ");
-      console.log(completion);
+      //console.log("Respuesta: ");
+      //console.log(completion);
 
       logger.error(`Error generating response with model ${model}: No valid response from IA.`);
     } catch (error) {
