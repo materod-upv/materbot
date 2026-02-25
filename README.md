@@ -101,6 +101,7 @@ fly secrets set DISCORD_CLIENT_ID=xxxxx
 fly secrets set DISCORD_TOKEN=xxxxx
 fly secrets set OPENROUTER_AI_TOKEN=xxxxx
 fly secrets set FIREBASE_CONFIG_B64=xxxxx
+fly secrets set MISTRAL_TOKEN=xxxxx
 ```
 6) To deploy/update your new app use:
 ```bash
