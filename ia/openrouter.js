@@ -46,10 +46,24 @@ async function generateBirthdayMessage(username) {
   return getCompletion(messages, "¡Hoy es un gran dia! ¡Un dia feliz es! ¡" + username + " feliz cumpleaños! ¡¡¡Voy a hacer una tarta que no vas a olvidar en toda tu vida!!! :birthday:");
 }
 
-async function generateBotResponse(username, message) {
+async function generateBotResponse(username, message, previousMessages = []) {
+  const now = new Date();
+  const currentTime = now.toISOString();
+
+  // Construir el contexto de la conversación con timestamps
+  let contextText = '';
+  if (previousMessages.length > 0) {
+    contextText = '[Contexto de la conversación reciente]:\n' +
+      previousMessages.map(msg => {
+        const msgTime = new Date(msg.timestamp).toISOString();
+        return `[${msgTime}] ${msg.author}: ${msg.content}`;
+      }).join('\n') +
+      '\n\n';
+  }
+
   const messages = [
-    { "role": "system", "content": systemPrompt + new Date().toISOString().split('T')[0] },
-    { "role": "user", "content": `Usuario: ${username} pregunta: ${message}` }
+    { "role": "system", "content": systemPrompt + now.toISOString().split('T')[0] + ` La hora actual es: ${currentTime}. Debes responder SOLO al mensaje actual del usuario, usa el contexto solo como referencia para entender la conversación.` },
+    { "role": "user", "content": `${contextText}[Mensaje actual al que debes responder]:\n[${currentTime}] ${username}: ${message}` }
   ];
 
   return getCompletion(messages);
