@@ -4,6 +4,7 @@ const {
   ContextMenuCommandBuilder,
   ModalBuilder,
   MessageFlags,
+  PermissionFlagsBits,
   TextInputBuilder,
   TextInputStyle
 } = require('discord.js');
@@ -23,7 +24,7 @@ module.exports = {
     const executingUser = interaction.user;
     const member = interaction.guild.members.cache.get(executingUser.id);
 
-    if ((targetUser.id !== executingUser.id) && !member.permissions.has('ADMINISTRATOR')) {
+    if ((targetUser.id !== executingUser.id) && !(member.permissions.has(PermissionFlagsBits.Administrator) || member.permissions.has(PermissionFlagsBits.ManageGuild))) {
       const locales = {
         'es-ES': `No puedes establecer el cumpleaños de otra persona`,
         'es-419': `No puedes establecer el cumpleños de otra persona`,
