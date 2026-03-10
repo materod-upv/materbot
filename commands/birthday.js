@@ -1,12 +1,13 @@
 const {
   ApplicationCommandType,
-  ActionRowBuilder,
   ContextMenuCommandBuilder,
   ModalBuilder,
   MessageFlags,
   PermissionFlagsBits,
   TextInputBuilder,
-  TextInputStyle
+  TextInputStyle,
+  TextDisplayBuilder,
+  LabelBuilder
 } = require('discord.js');
 const { setUser } = require('../database/firebase');
 const logger = require('../logger');
@@ -50,53 +51,76 @@ module.exports = {
       'es-419': `Cumpleaños`,
     }
     const modal = new ModalBuilder()
-      .setCustomId('Add Birthday')
+      .setCustomId(`Add Birthday:${targetUser.id}`)
       .setTitle(localesTitle[interaction.locale] ?? 'Birthday');
 
-    const localesDate = {
-      'es-ES': `¿Cuál es tu fecha de nacimiento?`,
-      'es-419': `¿Cuál es tu fecha de nacimiento?`,
-    }
-    const dateInput = new TextInputBuilder()
-      .setCustomId('dateInput')
-      .setLabel(localesDate[interaction.locale] ?? 'What is your birthday?')
-      .setStyle(TextInputStyle.Short)
-      .setPlaceholder('DD/MM/YYYY')
-      .setRequired(true);
-
-    const row1 = new ActionRowBuilder().addComponents(dateInput);
 
     if (targetUser.id !== executingUser.id) {
-      const localesUser = {
-        'es-ES': `Id del usuario`,
-        'es-419': `Id del usuario`,
+      const localeUsername = {
+        'es-ES': `**¿Cuál es el usuario?**: \n${targetUser.username}`,
+        'es-419': `**¿Cuál es el usuario?**: \n${targetUser.username}`,
       }
-      const userInput = new TextInputBuilder()
-        .setCustomId('userInput')
-        .setLabel(localesUser[interaction.locale] ?? 'User Id')
+      const username = new TextDisplayBuilder().setContent(
+        localeUsername[interaction.locale] ?? `**What is the user?**: ${targetUser.username}`
+      );
+
+      modal.addTextDisplayComponents(username);
+
+      const inputDate = new TextInputBuilder()
+        .setCustomId('dateInput')
         .setStyle(TextInputStyle.Short)
-        .setValue(targetUser.id)
-        .setRequired(false);
+        .setPlaceholder('DD/MM/YYYY')
+        .setRequired(true);
 
-      const row2 = new ActionRowBuilder().addComponents(userInput);
-      modal.addComponents(row1, row2);
+      const localesDate = {
+        'es-ES': `¿Cuál es su fecha de nacimiento?`,
+        'es-419': `¿Cuál es su fecha de nacimiento?`,
+      }
+      const labelDate = new LabelBuilder()
+        .setLabel(localesDate[interaction.locale] ?? 'What is their birthday?')
+        .setTextInputComponent(inputDate);
+
+      modal.addLabelComponents(labelDate);
     } else {
-      modal.addComponents(row1);
-    }
+      const inputDate = new TextInputBuilder()
+        .setCustomId('dateInput')
+        .setStyle(TextInputStyle.Short)
+        .setPlaceholder('DD/MM/YYYY')
+        .setRequired(true);
 
+      const localesDate = {
+        'es-ES': `¿Cuál es tu fecha de nacimiento?`,
+        'es-419': `¿Cuál es tu fecha de nacimiento?`,
+      }
+      const labelDate = new LabelBuilder()
+        .setLabel(localesDate[interaction.locale] ?? 'What is their birthday?')
+        .setTextInputComponent(inputDate);
+
+      modal.addLabelComponents(labelDate);
+    }
     await interaction.showModal(modal);
   },
-  async submit(interaction) {
-    const date = interaction.fields.getTextInputValue('dateInput');
-    let targetUser = interaction.user;
-    const executingUser = interaction.user;
-    let isChangingOtherUser = false;
+  async submit(interaction, params) {
+    // Get target user from params
+    const userId = params[0];
+    let targetUser = null;
     try {
-      const userId = interaction.fields.getTextInputValue('userInput');
       targetUser = await interaction.client.users.fetch(userId);
-      isChangingOtherUser = (targetUser.id !== executingUser.id);
     } catch (error) {
+      logger.error(`Error fetching user with ID ${userId}: `, error);
+      const locales = {
+        'es-ES': `No se ha podido encontrar el usuario`,
+        'es-419': `No se ha podido encontrar el usuario`,
+      };
+      await interaction.reply({ content: locales[interaction.locale] ?? `Could not find the user`, flags: MessageFlags.Ephemeral });
+      return
     }
+
+    const executingUser = interaction.user;
+    const isChangingOtherUser = (targetUser.id !== executingUser.id);
+
+    // Get date from modal input
+    const date = interaction.fields.getTextInputValue('dateInput');
 
     // Check if the date is valid
     if (!date.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
