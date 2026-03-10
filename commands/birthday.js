@@ -24,6 +24,17 @@ module.exports = {
     const executingUser = interaction.user;
     const member = interaction.guild.members.cache.get(executingUser.id);
 
+    // Check if target user is a bot
+    if (targetUser.bot) {
+      const locales = {
+        'es-ES': `No puedes establecer el cumpleaños de un bot`,
+        'es-419': `No puedes establecer el cumpleaños de un bot`,
+      };
+      logger.warn(`User ${executingUser.id} tried to set the birthday of a bot ${targetUser.id}`);
+      await interaction.reply({ content: locales[interaction.locale] ?? `You can't set the birthday of a bot`, flags: MessageFlags.Ephemeral });
+      return;
+    }
+
     if ((targetUser.id !== executingUser.id) && !(member.permissions.has(PermissionFlagsBits.Administrator) || member.permissions.has(PermissionFlagsBits.ManageGuild))) {
       const locales = {
         'es-ES': `No puedes establecer el cumpleaños de otra persona`,
@@ -78,9 +89,12 @@ module.exports = {
   async submit(interaction) {
     const date = interaction.fields.getTextInputValue('dateInput');
     let targetUser = interaction.user;
+    const executingUser = interaction.user;
+    let isChangingOtherUser = false;
     try {
       const userId = interaction.fields.getTextInputValue('userInput');
       targetUser = await interaction.client.users.fetch(userId);
+      isChangingOtherUser = (targetUser.id !== executingUser.id);
     } catch (error) {
     }
 
@@ -112,19 +126,36 @@ module.exports = {
         username: targetUser.username,
         birthday: birthday
       });
+
+      // Send DM to target user if someone else changed their birthday
+      if (isChangingOtherUser) {
+        try {
+          const dmLocales = {
+            'es-ES': `**${executingUser.username}** ha cambiado tu cumpleaños.`,
+            'es-419': `**${executingUser.username}** ha cambiado tu cumpleaños.`,
+          };
+          await targetUser.send(dmLocales[interaction.locale] ?? `**${executingUser.username}** has changed your birthday.`);
+          logger.info(`Sent DM to user ${targetUser.id} about birthday change by ${executingUser.id}`);
+        } catch (dmError) {
+          logger.warn(`Could not send DM to user ${targetUser.id}: ${dmError.message}`);
+          // Continue even if DM fails (user might have DMs disabled)
+        }
+      }
+
+      // Reply user
       const locales = {
         'es-ES': `El cumpleaños de ${targetUser.username} se ha establecido en ${date}`,
         'es-419': `El cumpleaños de ${targetUser.username} se ha establecido en ${date}`,
       };
       logger.info(`Set birthday of user ${targetUser.id} to ${date}`);
-      await interaction.editReply({ content: locales[interaction.locale] ?? `The birthday of ${targetUser.username} is set to ${date}`, flags: MessageFlags.Ephemeral });
+      await interaction.editReply({ content: locales[interaction.locale] ?? `The birthday of ${targetUser.username} is set to ${date}` });
     } catch (error) {
       const locales = {
         'es-ES': `No se ha podido actualizar el cumpleaños`,
         'es-419': `No se ha podido actualizar el cumpleaños`,
       };
       logger.error(`Error setting birthday for user ${targetUser.id}: `, error);
-      await interaction.reply({ content: locales[interaction.locale] ?? `Could not set the birthday`, flags: MessageFlags.Ephemeral });
+      await interaction.editReply({ content: locales[interaction.locale] ?? `Could not set the birthday` });
     }
   }
 };
