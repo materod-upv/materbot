@@ -5,7 +5,9 @@ const { AudioPlayerStatus,
   createAudioResource,
   joinVoiceChannel,
   getVoiceConnections,
-  NoSubscriberBehavior } = require('@discordjs/voice');
+  NoSubscriberBehavior,
+  VoiceConnectionStatus,
+  entersState } = require('@discordjs/voice');
 const { deleteFile } = require('./cleanTmpFiles');
 const logger = require('../logger');
 
@@ -29,32 +31,69 @@ async function processTask(task, cb) {
     adapterCreator: task.voiceChannel.guild.voiceAdapterCreator
   });
 
-  // Create audio player
-  const player = createAudioPlayer({
-    behaviors: {
-      noSubscriber: NoSubscriberBehavior.Pause,
-    },
-  });
-
-  player.on('stateChange', (oldState, newState) => {
-    if (newState.status === AudioPlayerStatus.Idle) {
-      logger.debug(`Finished playing sound ${task.soundFile} in channel ${task.voiceChannel.name}`);
-      cb();
+  // Handle connection disconnects
+  connection.on(VoiceConnectionStatus.Disconnected, async () => {
+    try {
+      await Promise.race([
+        entersState(connection, VoiceConnectionStatus.Signalling, 5_000),
+        entersState(connection, VoiceConnectionStatus.Connecting, 5_000),
+      ]);
+      // Seems to be reconnecting to a new channel - ignore disconnect
+    } catch {
+      // Seems to be a real disconnect which SHOULDN'T be recovered from
+      connection.destroy();
+      cb(new Error('Disconnected from voice channel'));
     }
   });
 
-  player.on('error', error => {
-    logger.error(`Error: ${error.message} with resource ${error.resource.metadata.title}`);
-    cb(error);
+  // Timeout for connection
+  const connectionTimeout = setTimeout(() => {
+    logger.error(`Connection timeout for ${task.voiceChannel.name}`);
+    connection.destroy();
+    cb(new Error('Connection timeout'));
+  }, 30_000);
+
+  // Wait for connection to be ready
+  connection.on(VoiceConnectionStatus.Ready, () => {
+    clearTimeout(connectionTimeout);
+    logger.debug(`Connection ready for ${task.voiceChannel.name}, playing sound`);
+
+    // Create audio player
+    const player = createAudioPlayer({
+      behaviors: {
+        noSubscriber: NoSubscriberBehavior.Pause,
+      },
+    });
+
+    player.on('stateChange', (oldState, newState) => {
+      if (newState.status === AudioPlayerStatus.Idle) {
+        logger.debug(`Finished playing sound ${task.soundFile} in channel ${task.voiceChannel.name}`);
+        cb();
+      }
+    });
+
+    player.on('error', error => {
+      logger.error(`Error: ${error.message} with resource ${error.resource?.metadata?.title || 'unknown'}`);
+      cb(error);
+    });
+
+    // Create audio resource
+    const resource = createAudioResource(task.soundFile, {
+      inlineVolume: true
+    });
+
+    // Subscribe connection to player
+    const subscription = connection.subscribe(player);
+
+    if (!subscription) {
+      logger.error('Failed to subscribe to audio player - connection may be destroyed');
+      cb(new Error('Failed to subscribe'));
+      return;
+    }
+
+    // Play audio
+    player.play(resource);
   });
-
-  // Create audio resource
-  const readStream = fs.createReadStream(task.soundFile);
-  const resource = createAudioResource(readStream);
-
-  // Play audio
-  player.play(resource);
-  connection.subscribe(player);
 }
 
 function filterTask(task, cb) {
