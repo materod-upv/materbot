@@ -84,9 +84,10 @@ module.exports = {
     }
 
     // Increase the probability if the message contains keywords related to bots or AI
-    const hasKeyword = config.ai.keywords.some(keyword =>
-      message.content.toLowerCase().includes(keyword)
-    );
+    const hasKeyword = config.ai.keywords.some(keyword => {
+      const regex = new RegExp(`\\b${keyword}\\b`, 'i');
+      return regex.test(message.content);
+    });
 
     const chance = hasKeyword ? config.ai.randomResponseChance * 2 : config.ai.randomResponseChance;
     return Math.random() < chance;

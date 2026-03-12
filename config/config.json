@@ -22,7 +22,7 @@
     "minMessageLength": 20,
     "cooldownMs": 300000,
     "contextMessages": 50,
-    "keywords": ["bot", "ia", "materbot"],
-    "ignoredGuilds": ["207107893021900801"]
+    "keywords": ["bot", "ia", "materbot", "lanzallamas"],
+    "ignoredGuilds": []
   }
 }
