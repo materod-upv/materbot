@@ -18,7 +18,7 @@
   },
   "ai": {
     "mentionResponseChance": 1.0,
-    "randomResponseChance": 0.15,
+    "randomResponseChance": 0.0,
     "minMessageLength": 20,
     "cooldownMs": 300000,
     "contextMessages": 50,
