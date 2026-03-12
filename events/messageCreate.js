@@ -68,6 +68,11 @@ module.exports = {
       return Math.random() < config.ai.mentionResponseChance;
     }
 
+    // Don't respond messages in some guild channels
+    if (message.guild && config.ai.ignoredGuilds.includes(message.guild.id)) {
+      return false;
+    }
+
     // Don't respond to short messages
     if (message.content.length < config.ai.minMessageLength) {
       return false;
