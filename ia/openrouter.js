@@ -1,16 +1,15 @@
-const OpenAI = require('openai');
+const { Mistral } = require('@mistralai/mistralai');
 const { logger } = require('../logger');
 const config = require('../config/config');
 
-const openai = new OpenAI({
-  baseURL: "https://openrouter.ai/api/v1",
-  apiKey: process.env.OPENROUTER_AI_TOKEN
+const mistral = new Mistral({
+  apiKey: process.env.MISTRAL_TOKEN
 });
 
 const models = [
-  "tngtech/deepseek-r1t2-chimera:free",
-  "tngtech/deepseek-r1t-chimera:free",
-  "deepseek/deepseek-chat-v3-0324:free"
+  "mistral-small-latest",
+  "mistral-medium-latest",
+  "open-mistral-7b"
 ]
 
 const birthdayPrompt = "Eres un generador de felicitaciones de cumpleaños con aspecto de robot humanoide llamado Materbot \
@@ -47,10 +46,24 @@ async function generateBirthdayMessage(username) {
   return getCompletion(messages, "¡Hoy es un gran dia! ¡Un dia feliz es! ¡" + username + " feliz cumpleaños! ¡¡¡Voy a hacer una tarta que no vas a olvidar en toda tu vida!!! :birthday:");
 }
 
-async function generateBotResponse(username, message) {
+async function generateBotResponse(username, message, previousMessages = []) {
+  const now = new Date();
+  const currentTime = now.toISOString();
+
+  // Construir el contexto de la conversación con timestamps
+  let contextText = '';
+  if (previousMessages.length > 0) {
+    contextText = '[Contexto de la conversación reciente]:\n' +
+      previousMessages.map(msg => {
+        const msgTime = new Date(msg.timestamp).toISOString();
+        return `[${msgTime}] ${msg.author}: ${msg.content}`;
+      }).join('\n') +
+      '\n\n';
+  }
+
   const messages = [
-    { "role": "system", "content": systemPrompt + new Date().toISOString().split('T')[0] },
-    { "role": "user", "content": `Usuario: ${username} pregunta: ${message}` }
+    { "role": "system", "content": systemPrompt + now.toISOString().split('T')[0] + ` La hora actual es: ${currentTime}. Debes responder SOLO al mensaje actual del usuario, usa el contexto solo como referencia para entender la conversación.` },
+    { "role": "user", "content": `${contextText}[Mensaje actual al que debes responder]:\n[${currentTime}] ${username}: ${message}` }
   ];
 
   return getCompletion(messages);
@@ -76,17 +89,17 @@ async function generateChannelSummary(messageList) {
 async function getCompletion(messages, defaultResponse = null) {
   for (const model of models) {
     try {
-      const completion = await openai.chat.completions.create({
+      const completion = await mistral.chat.complete({
         model: model,
         messages: messages
       });
 
-      if (completion.choices && completion.choices.length > 0 && completion.choices[0].finish_reason === "stop") {
+      if (completion.choices && completion.choices.length > 0 && completion.choices[0].finishReason === "stop") {
         return completion.choices[0].message.content;
       }
 
-      console.log("Respuesta: ");
-      console.log(completion);
+      //console.log("Respuesta: ");
+      //console.log(completion);
 
       logger.error(`Error generating response with model ${model}: No valid response from IA.`);
     } catch (error) {

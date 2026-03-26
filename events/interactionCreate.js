@@ -5,8 +5,10 @@ module.exports = {
   name: Events.InteractionCreate,
   async execute(interaction) {
     let commandId = interaction.commandName;
+    let params = null;
     if (interaction.isModalSubmit()) {
-      commandId = interaction.customId;
+      commandId = interaction.customId.split(':')[0]; // Extract command ID from customId
+      params = interaction.customId.split(':').slice(1); // Extract parameters from customId if needed
     }
 
     const command = interaction.client.commands.get(commandId);
@@ -24,7 +26,7 @@ module.exports = {
         await command.autocomplete(interaction);
       } else if (interaction.isModalSubmit()) {
         // Modal submit command
-        await command.submit(interaction);
+        await command.submit(interaction, params);
       }
     } catch (error) {
       logger.error(error);

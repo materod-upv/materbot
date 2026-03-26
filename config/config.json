@@ -15,5 +15,14 @@
     "moveNewChannel": "Que pasa {user}",
     "startStreaming": "{user} ha comenzado una retransmisión",
     "stopStreaming": "{user} ha finalizado la retransmisión"
+  },
+  "ai": {
+    "mentionResponseChance": 1.0,
+    "randomResponseChance": 0.0,
+    "minMessageLength": 20,
+    "cooldownMs": 300000,
+    "contextMessages": 50,
+    "keywords": ["bot", "ia", "materbot", "lanzallamas"],
+    "ignoredGuilds": []
   }
 }
