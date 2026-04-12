@@ -20,7 +20,7 @@
   "dependencies": {
     "@discordjs/voice": "^0.19.1",
     "@mistralai/mistralai": "^1.14.1",
-    "axios": "^1.12.2",
+    "axios": "^1.15.0",
     "better-node-gtts": "^1.1.0",
     "better-queue": "^3.8.12",
     "discord.js": "^14.25.1",
