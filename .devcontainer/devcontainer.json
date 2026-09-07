@@ -4,19 +4,11 @@
   "build": {
     "dockerfile": "Dockerfile"
   },
-
-  "customizations": {
-    "vscode": {
-      "extensions": [
-        "GitHub.copilot"
-      ]
-    }
-  },
-
   "remoteUser": "node",
-  
   "runArgs": [
-    "--env-file", ".devcontainer/devcontainer.env", 
-    "--expose", "30000-40000/udp" // Expose the port range for bot sounds
+    "--env-file",
+    ".devcontainer/devcontainer.env",
+    "--expose",
+    "30000-40000/udp" // Expose the port range for bot sounds
   ]
 }
