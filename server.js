@@ -4,6 +4,8 @@ const morgan = require('morgan');
 const path = require('path');
 const fs = require('fs');
 
+const { generateDependencyReport } = require('@discordjs/voice');
+
 const logger = require('./logger');
 const { cleanTemporalFiles } = require('./sounds/cleanTmpFiles');
 const { Bot } = require('./bot');
@@ -30,6 +32,9 @@ const server = app.listen(port, () => {
 
   // Clean tmp files
   cleanTemporalFiles();
+
+  // Print dependency report for @discordjs/voice
+  logger.debug('Dependency report for @discordjs/voice:\n' + generateDependencyReport());
 
   // Start the bot
   bot.start();

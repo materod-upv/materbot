@@ -1,14 +1,15 @@
-const firebase = require('firebase-admin');
+const { initializeApp, cert } = require('firebase-admin/app');
+const { getFirestore } = require('firebase-admin/firestore');
 const logger = require('../logger');
 
 const firebaseConfigJson = Buffer.from(process.env.FIREBASE_CONFIG_B64, 'base64').toString('utf-8');
 const firebaseConfig = JSON.parse(firebaseConfigJson);
 
-firebase.initializeApp({
-  credential: firebase.credential.cert(firebaseConfig),
+initializeApp({
+  credential: cert(firebaseConfig),
 });
 
-const db = firebase.firestore();
+const db = getFirestore();
 const usersCache = {};
 
 async function loadUserCache() {
