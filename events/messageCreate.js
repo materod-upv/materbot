@@ -10,7 +10,7 @@ module.exports = {
   async execute(message) {
     if (message.author.bot) return;
 
-    logger.info(`Message from ${message.author.tag}: ${message.content}`);
+    logger.debug(`Message from ${message.author.tag}: ${message.content}`);
 
     const isMentioned = message.mentions.users.has(message.client.user.id);
     const shouldRespond = this.shouldBotRespond(message, isMentioned);
