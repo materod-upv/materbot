@@ -6,10 +6,15 @@
 app = "materbot"
 primary_region = "mad"
 
+[vm]
+  memory = "512mb"
+  cpu_kind = "shared"
+  cpus = 1
+
 [env]
   PORT="8080"
   BOT_LANG="es"
-  LOG_LEVEL="debug"
+  LOG_LEVEL="info"
 
 [http_service]
   internal_port = 8080

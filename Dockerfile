@@ -1,39 +1,45 @@
 # syntax = docker/dockerfile:1
 
-# Adjust NODE_VERSION as desired
-FROM node:24-bullseye as base
+# Cambiado a bookworm (Debian actual compatible con Node 24)
+FROM node:24-bookworm AS base
 
-# Install basic development tools
-RUN apt update && apt install -y ffmpeg
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Instalación limpia de FFmpeg evitando preguntas interactivas
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ffmpeg \
+    && rm -rf /var/lib/apt/lists/*
 
 LABEL fly_launch_runtime="NodeJS"
 
-# NodeJS app lives here
 WORKDIR /app
 
-# Set production environment
 ENV NODE_ENV=production
 
 
-# Throw-away build stage to reduce size of final image
-FROM base as build
+# Stage de compilación (build)
+FROM base AS build
 
-# Install packages needed to build node modules
+# Instalar dependencias para compilar módulos nativos
 RUN apt-get update -qq && \
-    apt-get install -y python-is-python3 pkg-config build-essential 
+    apt-get install -y --no-install-recommends \
+    python-is-python3 \
+    pkg-config \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install node modules
+# Instalar paquetes de npm
 COPY --link package.json package-lock.json .
-RUN npm install
+RUN npm ci --only=production
 
-# Copy application code
+# Copiar el código del proyecto
 COPY --link . .
 
-# Final stage for app image
+
+# Stage final para la imagen de producción
 FROM base
 
-# Copy built application
+# Copiar la aplicación compilada
 COPY --from=build /app /app
 
-# Start the server by default, this can be overwritten at runtime
 CMD [ "npm", "run", "start" ]
