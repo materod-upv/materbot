@@ -8,7 +8,7 @@ module.exports = {
   async execute(oldMessage, newMessage) {
     if (newMessage.author.bot) return;
 
-    logger.info(`Message updated by ${newMessage.author.tag}: ${newMessage.content}`);
+    logger.debug(`Message updated by ${newMessage.author.tag}: ${newMessage.content}`);
 
     // Solo responde si el mensaje editado menciona al bot
     if (newMessage.mentions.users.has(newMessage.client.user.id)) {
@@ -21,21 +21,21 @@ module.exports = {
       );
 
       await newMessage.channel.sendTyping();
-      
+
       // Obtener contexto del canal
       const previousMessages = await this.getChannelContext(newMessage.channel);
-      
+
       const response = await generateBotResponse(
-        newMessage.author.tag, 
+        newMessage.author.tag,
         newMessage.content,
         previousMessages
       );
-      
+
       if (response && response.trim() !== '') {
         // Delay aleatorio para parecer más humano
         const delay = 1000 + Math.random() * 2000;
         await new Promise(resolve => setTimeout(resolve, delay));
-        
+
         if (botReply) {
           await botReply.edit(response);
         } else {
@@ -47,10 +47,10 @@ module.exports = {
 
   async getChannelContext(channel) {
     try {
-      const messages = await channel.messages.fetch({ 
-        limit: config.ai.contextMessages 
+      const messages = await channel.messages.fetch({
+        limit: config.ai.contextMessages
       });
-      
+
       // Convertir a array y ordenar del más antiguo al más reciente
       return messages
         .sort((a, b) => a.createdTimestamp - b.createdTimestamp)

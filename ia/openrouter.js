@@ -1,5 +1,5 @@
 const { Mistral } = require('@mistralai/mistralai');
-const { logger } = require('../logger');
+const logger = require('../logger');
 const config = require('../config/config');
 
 const mistral = new Mistral({
@@ -103,7 +103,7 @@ async function getCompletion(messages, defaultResponse = null) {
 
       logger.error(`Error generating response with model ${model}: No valid response from IA.`);
     } catch (error) {
-      logger.error(`Error with model ${model}:`, JSON.stringify(error));
+      logger.error(`Error with model ${model}:`, error);
     }
   }
 
