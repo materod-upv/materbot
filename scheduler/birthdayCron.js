@@ -3,13 +3,13 @@ const logger = require('../logger');
 const config = require('../config/config');
 const { getUsersList } = require('../database/firebase');
 const { generateBirthdayMessage } = require('../ia/openrouter');
+const { isBirthdayToday } = require('../utils/birthday');
 
 function sendHappyBirthDayMsg(guilds) {
   const today = new Date();
   const users = getUsersList();
-  for (id in users) {
-    const birthDate = new Date(users[id].birthday);
-    if (birthDate.getDate() === today.getDate() && birthDate.getMonth() === today.getMonth()) {
+  for (const id in users) {
+    if (isBirthdayToday(users[id].birthday, today)) {
       logger.debug(`Today is the birthday of user ${users[id].username}...`);
 
       // For each guild, fetch the member and send the birthday message

@@ -5,6 +5,7 @@ const textToSpeech = require('../sounds/tts');
 const VoicePlayer = require('../sounds/VoicePlayer');
 const config = require('../config/config.json');
 const { getUser } = require('../database/firebase');
+const { isBirthdayToday } = require('../utils/birthday');
 
 module.exports = {
   name: Events.VoiceStateUpdate,
@@ -31,14 +32,10 @@ module.exports = {
 
       // Play birthday sound if user has birthday today
       const user = await getUser(newState.member.user.id);
-      if (user && user.birthday) {
-        const today = new Date();
-        const birthday = new Date(user.birthday);
-        if (today.getMonth() === birthday.getMonth() && today.getDate() === birthday.getDate()) {
-          const birthdayAudioPath = path.join(__dirname + '/../resources/audio/cumple.mp3');
-          VoicePlayer.playSound(newState.channel, birthdayAudioPath);
-          return;
-        }
+      if (user && isBirthdayToday(user.birthday)) {
+        const birthdayAudioPath = path.join(__dirname + '/../resources/audio/cumple.mp3');
+        VoicePlayer.playSound(newState.channel, birthdayAudioPath);
+        return;
       }
 
       let msg = config.voice.joinVoiceChannel
